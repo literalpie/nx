@@ -24,17 +24,17 @@ import {
   addProviderToModule,
   insert
 } from '../../utils/ast-utils';
-import { insertImport } from '@schematics/angular/utility/route-utils';
-import { Schema } from './schema';
+import {insertImport} from '@schematics/angular/utility/route-utils';
+import {NgrxOptions} from './schema';
 import {
   ngrxVersion,
   routerStoreVersion,
   ngrxStoreFreezeVersion
 } from '../../lib-versions';
-import { serializeJson } from '../../utils/fileutils';
-import { wrapIntoFormat } from '../../utils/tasks';
+import {serializeJson} from '../../utils/fileutils';
+import {wrapIntoFormat} from '../../utils/tasks';
 
-function addImportsToModule(name: string, options: Schema): Rule {
+function addImportsToModule(name: string, options: NgrxOptions): Rule {
   return (host: Tree) => {
     if (options.onlyAddFiles) {
       return host;
@@ -48,10 +48,10 @@ function addImportsToModule(name: string, options: Schema): Rule {
 
     const sourceText = host.read(modulePath)!.toString('utf-8');
     const source = ts.createSourceFile(
-      modulePath,
-      sourceText,
-      ts.ScriptTarget.Latest,
-      true
+        modulePath,
+        sourceText,
+        ts.ScriptTarget.Latest,
+        true
     );
 
     if (options.onlyEmptyRoot) {
@@ -59,47 +59,47 @@ function addImportsToModule(name: string, options: Schema): Rule {
         insertImport(source, modulePath, 'StoreModule', '@ngrx/store'),
         insertImport(source, modulePath, 'EffectsModule', '@ngrx/effects'),
         insertImport(
-          source,
-          modulePath,
-          'StoreDevtoolsModule',
-          '@ngrx/store-devtools'
+            source,
+            modulePath,
+            'StoreDevtoolsModule',
+            '@ngrx/store-devtools'
         ),
         insertImport(
-          source,
-          modulePath,
-          'environment',
-          '../environments/environment'
+            source,
+            modulePath,
+            'environment',
+            '../environments/environment'
         ),
         insertImport(
-          source,
-          modulePath,
-          'StoreRouterConnectingModule',
-          '@ngrx/router-store'
+            source,
+            modulePath,
+            'StoreRouterConnectingModule',
+            '@ngrx/router-store'
         ),
         insertImport(source, modulePath, 'storeFreeze', 'ngrx-store-freeze'),
         ...addImportToModule(
-          source,
-          modulePath,
-          `StoreModule.forRoot({},{metaReducers: !environment.production ? [storeFreeze] : []})`
+            source,
+            modulePath,
+            `StoreModule.forRoot({},{metaReducers: !environment.production ? [storeFreeze] : []})`
         ),
         ...addImportToModule(source, modulePath, `EffectsModule.forRoot([])`),
         ...addImportToModule(
-          source,
-          modulePath,
-          `!environment.production ? StoreDevtoolsModule.instrument() : []`
+            source,
+            modulePath,
+            `!environment.production ? StoreDevtoolsModule.instrument() : []`
         ),
         ...addImportToModule(source, modulePath, `StoreRouterConnectingModule`)
       ]);
       return host;
     } else {
       const reducerPath = `./${toFileName(options.directory)}/${toFileName(
-        name
+          name
       )}.reducer`;
       const effectsPath = `./${toFileName(options.directory)}/${toFileName(
-        name
+          name
       )}.effects`;
       const initPath = `./${toFileName(options.directory)}/${toFileName(
-        name
+          name
       )}.init`;
 
       const reducerName = `${toPropertyName(name)}Reducer`;
@@ -119,62 +119,62 @@ function addImportsToModule(name: string, options: Schema): Rule {
         insert(host, modulePath, [
           ...common,
           insertImport(
-            source,
-            modulePath,
-            'StoreDevtoolsModule',
-            '@ngrx/store-devtools'
+              source,
+              modulePath,
+              'StoreDevtoolsModule',
+              '@ngrx/store-devtools'
           ),
           insertImport(
-            source,
-            modulePath,
-            'environment',
-            '../environments/environment'
+              source,
+              modulePath,
+              'environment',
+              '../environments/environment'
           ),
           insertImport(
-            source,
-            modulePath,
-            'StoreRouterConnectingModule',
-            '@ngrx/router-store'
+              source,
+              modulePath,
+              'StoreRouterConnectingModule',
+              '@ngrx/router-store'
           ),
           insertImport(source, modulePath, 'storeFreeze', 'ngrx-store-freeze'),
           ...addImportToModule(
-            source,
-            modulePath,
-            `StoreModule.forRoot({${toPropertyName(name)}: ${reducerName}}, {
+              source,
+              modulePath,
+              `StoreModule.forRoot({${toPropertyName(name)}: ${reducerName}}, {
               initialState: {${toPropertyName(name)}: ${initName}},
               metaReducers: !environment.production ? [storeFreeze] : []
             })`
           ),
           ...addImportToModule(
-            source,
-            modulePath,
-            `EffectsModule.forRoot([${effectsName}])`
+              source,
+              modulePath,
+              `EffectsModule.forRoot([${effectsName}])`
           ),
           ...addImportToModule(
-            source,
-            modulePath,
-            `!environment.production ? StoreDevtoolsModule.instrument() : []`
+              source,
+              modulePath,
+              `!environment.production ? StoreDevtoolsModule.instrument() : []`
           ),
           ...addImportToModule(
-            source,
-            modulePath,
-            `StoreRouterConnectingModule`
+              source,
+              modulePath,
+              `StoreRouterConnectingModule`
           )
         ]);
       } else {
         insert(host, modulePath, [
           ...common,
           ...addImportToModule(
-            source,
-            modulePath,
-            `StoreModule.forFeature('${toPropertyName(
-              name
-            )}', ${reducerName}, {initialState: ${initName}})`
+              source,
+              modulePath,
+              `StoreModule.forFeature('${toPropertyName(
+                  name
+              )}', ${reducerName}, {initialState: ${initName}})`
           ),
           ...addImportToModule(
-            source,
-            modulePath,
-            `EffectsModule.forFeature([${effectsName}])`
+              source,
+              modulePath,
+              `EffectsModule.forFeature([${effectsName}])`
           )
         ]);
       }
@@ -197,26 +197,30 @@ function addNgRxToPackageJson() {
     if (!json['dependencies']['@ngrx/store']) {
       json['dependencies']['@ngrx/store'] = ngrxVersion;
     }
-    if (!json['dependencies']['@ngrx/router-store']) {
-      json['dependencies']['@ngrx/router-store'] = routerStoreVersion;
-    }
     if (!json['dependencies']['@ngrx/effects']) {
       json['dependencies']['@ngrx/effects'] = ngrxVersion;
+    }
+    if (!json['dependencies']['@ngrx/entity']) {
+      json['dependencies']['@ngrx/entity'] = ngrxVersion;
     }
     if (!json['dependencies']['@ngrx/store-devtools']) {
       json['dependencies']['@ngrx/store-devtools'] = ngrxVersion;
     }
+    if (!json['dependencies']['@ngrx/router-store']) {
+      json['dependencies']['@ngrx/router-store'] = routerStoreVersion;
+    }
     if (!json['dependencies']['ngrx-store-freeze']) {
       json['dependencies']['ngrx-store-freeze'] = ngrxStoreFreezeVersion;
     }
+
     host.overwrite('package.json', serializeJson(json));
     return host;
   };
 }
 
-export default function(schema: Schema): Rule {
+export default function (_options: NgrxOptions): Rule {
   return wrapIntoFormat(() => {
-    const options = normalizeOptions(schema);
+    const options = normalizeOptions(_options);
     const name = options.name;
     const moduleDir = path.dirname(options.module);
 
@@ -227,7 +231,7 @@ export default function(schema: Schema): Rule {
       ]);
     } else {
       const templateSource = apply(url('./files'), [
-        template({ ...options, tmpl: '', ...names(name) }),
+        template({...options, tmpl: '', ...names(name)}),
         move(moduleDir)
       ]);
       return chain([
@@ -239,6 +243,6 @@ export default function(schema: Schema): Rule {
   });
 }
 
-function normalizeOptions(options: Schema): Schema {
-  return { ...options, directory: toFileName(options.directory) };
+function normalizeOptions(options: NgrxOptions): NgrxOptions {
+  return {...options, directory: toFileName(options.directory)};
 }

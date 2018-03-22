@@ -6,11 +6,11 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Name of the directory (e.g., state)."
+      "description": "Name of the directory (e.g., mylib)."
     },
     "module": {
       "type": "string",
-      "description": "Path to an Angular module (e.g., src/app/app.module.ts)."
+      "description": "Path to an Angular module (e.g., src/libs/mylib/mylib.module.ts)."
     },
     "onlyAddFiles": {
       "type": "boolean",
@@ -35,7 +35,7 @@
     "directory": {
       "type": "string",
       "default": "+state",
-      "description": "The store directory name (e.g., +state)"
+      "description": "The directory name for the ngrx files: contains actions, effects, reducers. (e.g., +state)"
     }
   },
   "required": [

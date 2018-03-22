@@ -1,4 +1,4 @@
-export interface Schema {
+export interface NgrxOptions {
   name: string;
   onlyEmptyRoot: boolean;
   root: boolean;
